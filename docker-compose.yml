@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: myappdb
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Use environment variable
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d myappdb"]
       interval: 10s
@@ -14,12 +14,14 @@ services:
       retries: 5
     networks:
       - app-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: adminpassword
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL} # Use environment variable
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD} # Use environment variable
       PGADMIN_LISTEN_PORT: 80
     depends_on:
       - postgres
@@ -31,7 +33,9 @@ services:
       - app-network
 
   fastapi:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./:/myapp/
     depends_on:
